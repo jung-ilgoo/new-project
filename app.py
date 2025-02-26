@@ -8,12 +8,6 @@ from routes.players import players_bp
 
 app = Flask(__name__)
 
-main_bp = Blueprint('main_bp', __name__)
-
-@main_bp.route("/")
-def home():
-    return render_template("index.html")
-
 app.register_blueprint(main_bp)
 app.register_blueprint(players_bp)
 
