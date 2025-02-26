@@ -6,9 +6,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    # DB 연결
-    conn = psycopg2.connect(os.environ["postgres://new_fly_project:ZdDBUehGzo0AUpQ@new-fly-postgres.flycast:5432/new_fly_project?sslmode=disable"])
-    # 쿼리 실행 예시
+    # Fly.io에서 자동 설정된 환경 변수 사용 (DATABASE_URL)
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
     with conn.cursor() as cur:
         cur.execute("SELECT 'Hello from PostgreSQL!'")
         row = cur.fetchone()
