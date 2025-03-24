@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>플레이어 수정</title>
+</head>
+<body>
+    <h1>✏️ 플레이어 수정</h1>
+
+    <form action="/update_player/{{ player[0] }}" method="POST">
+        <label for="player_name">플레이어 ID:</label>
+        <input type="text" id="player_name" name="player_name" value="{{ player[1] }}" required>
+        <button type="submit">저장</button>
+    </form>
+
+    <br>
+    <a href="/add_player">↩️ 플레이어 목록으로</a>
+    <br>
+    <a href="/">🏠 홈으로</a>
+</body>
+</html>

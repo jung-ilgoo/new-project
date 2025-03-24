@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 승률 랭킹</title>
+    <title>🏆 랭킹</title>
     <style>
         body {
             background-color: #121212;
@@ -11,7 +11,7 @@
             font-family: Arial, sans-serif;
             text-align: center;
         }
-        h1 {
+        h1, h2 {
             color: #FFD700;
         }
         table {
@@ -38,6 +38,18 @@
         tr:hover {
             background-color: #444;
         }
+        .mercenary-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #666;
+        }
+        .mercenary-title {
+            color: #ff9800;
+        }
+        .mercenary-table th {
+            background-color: #3e2723;
+            color: #ff9800;
+        }
         a {
             display: inline-block;
             margin-top: 20px;
@@ -55,6 +67,9 @@
 </head>
 <body>
     <h1>🏆 승률 랭킹</h1>
+    
+    <!-- 정규 플레이어 (10게임 이상) -->
+    <h2>정규 플레이어</h2>
     <table>
         <thead>
             <tr>
@@ -69,20 +84,87 @@
             </tr>
         </thead>
         <tbody>
-            {% for player, total_games, wins, win_rate, favorite_champion, favorite_position, avg_kda in rankings %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ player }}</td>
-                <td>{{ total_games }}</td>
-                <td>{{ wins }}</td>
-                <td>{{ "%.2f"|format(win_rate) }}%</td>
-                <td>{{ favorite_champion if favorite_champion else 'N/A' }}</td>
-                <td>{{ favorite_position if favorite_position else 'N/A' }}</td>
-                <td>{{ "%.2f"|format(avg_kda) if avg_kda is not none else '0.00' }}</td>
-            </tr>
+            {# 정규 플레이어만 필터링 #}
+            {% set regular_players = [] %}
+            {% for player_data in rankings %}
+                {% if player_data[1] >= 10 %}
+                    {% set _ = regular_players.append(player_data) %}
+                {% endif %}
+            {% endfor %}
+            
+            {# 정규 플레이어 목록 표시 #}
+            {% for player_data in regular_players %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ player_data[0] }}</td>
+                    <td>{{ player_data[1] }}</td>
+                    <td>{{ player_data[2] }}</td>
+                    <td>{{ "%.2f"|format(player_data[3]) }}%</td>
+                    <td>
+                        {% if player_data[4] %}
+                            <!-- 챔피언 아이콘 -->
+                            <img src="{{ url_for('static', filename='img/champions/' ~ player_data[4] ~ '.png') }}"
+                                 alt="{{ player_data[4] }}"
+                                 style="width: 24px; height: 24px; margin-right: 4px; vertical-align: middle;">
+
+                            <!-- 챔피언 이름 텍스트 -->
+                            {{ player_data[4] }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ player_data[5] if player_data[5] else 'N/A' }}</td>
+                    <td>{{ "%.2f"|format(player_data[6]) if player_data[6] is not none else '0.00' }}</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- 용병 플레이어 (10게임 미만) -->
+    <div class="mercenary-section">
+        <h2 class="mercenary-title">⚔️ 용병 플레이어</h2>
+        <table class="mercenary-table">
+            <thead>
+                <tr>
+                    <th>플레이어</th>
+                    <th>총 경기 수</th>
+                    <th>승리 횟수</th>
+                    <th>승률 (%)</th>
+                    <th>가장 많이 플레이한 챔피언</th>
+                    <th>주 포지션</th>
+                    <th>평균 KDA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player_data in rankings %}
+                    {% if player_data[1] < 10 %}
+                    <tr>
+                        <td>{{ player_data[0] }}</td>
+                        <td>{{ player_data[1] }}</td>
+                        <td>{{ player_data[2] }}</td>
+                        <td>{{ "%.2f"|format(player_data[3]) }}%</td>
+                        <td>
+                            {% if player_data[4] %}
+                                <!-- 챔피언 아이콘 -->
+                                <img src="{{ url_for('static', filename='img/champions/' ~ player_data[4] ~ '.png') }}"
+                                     alt="{{ player_data[4] }}"
+                                     style="width: 24px; height: 24px; margin-right: 4px; vertical-align: middle;">
+
+                                <!-- 챔피언 이름 텍스트 -->
+                                {{ player_data[4] }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ player_data[5] if player_data[5] else 'N/A' }}</td>
+                        <td>{{ "%.2f"|format(player_data[6]) if player_data[6] is not none else '0.00' }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <br>
     <a href="/">🏠 홈으로</a>
 </body>

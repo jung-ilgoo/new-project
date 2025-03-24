@@ -1,147 +1,519 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>경기 기록 입력</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            margin: 20px;
-        }
-        .container {
-            width: 60%;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        .team-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .team-box {
-            width: 48%;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-        }
-        .blue-team {
-            background-color: #d9e9ff;
-        }
-        .red-team {
-            background-color: #ffdbdb;
-        }
-        select, input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .kda-container {
-            display: flex;
-            gap: 5px;
-        }
-        .kda-container input {
-            width: 32%;
-            text-align: center;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .winner-container {
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>경기 기록 입력</title>
+  <!-- 부트스트랩 CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- Select2 CSS 추가 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+    /* 추가 커스텀 스타일 */
+    body {
+      background-color: #f4f4f4;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .team-box {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .kda-container {
+      display: flex;
+      gap: 5px;
+    }
+    .kda-container input {
+      width: 33%;
+    }
+    /* Select2 스타일 조정 */
+    .select2-container {
+      width: 100% !important;
+      margin-bottom: 5px;
+    }
+    .select2-container--default .select2-selection--single {
+      height: 38px;
+      border-radius: 0.375rem;
+      border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 36px;
+    }
+    /* 성공 메시지 알림 스타일 */
+    .alert-success {
+      animation: fadeOut 5s forwards;
+      margin-bottom: 20px;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚔ 경기 기록 입력</h1>
-        <form action="/record" method="POST">
-            <label for="match_date">경기 날짜:</label>
-            <input type="date" id="match_date" name="match_date" required><br><br>
+  <div class="container my-4">
+    <h1 class="text-center mb-4">⚔ 경기 기록 입력 (KDA, 챔피언 포함)</h1>
 
-            <div class="team-container">
-                <!-- 블루팀 -->
-                <div class="team-box blue-team">
-                    <h2>🔹 블루팀</h2>
-                    {% for position in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'] %}
-                    <label>{{ position }}</label>
-                    <select name="blue_{{ position.lower() }}" required>
-                        <option value="" selected disabled>선택하세요</option>
-                        {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                        {% endfor %}
-                    </select>
-                    <select name="blue_{{ position.lower() }}_champion" required>
-                        <option value="" selected disabled>선택하세요</option>
-                        {% for champion in champions %}
-                        <option value="{{ champion }}">{{ champion }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="kda-container">
-                        <input type="number" name="blue_{{ position.lower() }}_kill" placeholder="킬" required min="0">
-                        <input type="number" name="blue_{{ position.lower() }}_death" placeholder="데스" required min="0">
-                        <input type="number" name="blue_{{ position.lower() }}_assist" placeholder="어시" required min="0">
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- 레드팀 -->
-                <div class="team-box red-team">
-                    <h2>🔹 레드팀</h2>
-                    {% for position in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'] %}
-                    <label>{{ position }}</label>
-                    <select name="red_{{ position.lower() }}" required>
-                        <option value="" selected disabled>선택하세요</option>
-                        {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                        {% endfor %}
-                    </select>
-                    <select name="red_{{ position.lower() }}_champion" required>
-                        <option value="" selected disabled>선택하세요</option>
-                        {% for champion in champions %}
-                        <option value="{{ champion }}">{{ champion }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="kda-container">
-                        <input type="number" name="red_{{ position.lower() }}_kill" placeholder="킬" required min="0">
-                        <input type="number" name="red_{{ position.lower() }}_death" placeholder="데스" required min="0">
-                        <input type="number" name="red_{{ position.lower() }}_assist" placeholder="어시" required min="0">
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="winner-container">
-                <h2>🏆 승리 팀 선택</h2>
-                <select id="winner" name="winner" required>
-                    <option value="" selected disabled>선택하세요</option>
-                    <option value="blue">블루팀</option>
-                    <option value="red">레드팀</option>
-                </select>
-            </div>
-
-            <br><br>
-            <button type="submit">경기 기록 저장</button>
-        </form>
+        <!-- 성공 메시지 표시 -->
+    {% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <strong>{{ success_message }}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+    {% endif %}
+    
+    <form action="/record" method="POST" class="bg-white p-4 rounded shadow" id="recordForm">
+      <!-- 경기 날짜 -->
+      <div class="mb-3">
+        <label for="match_date" class="form-label">경기 날짜</label>
+        <input type="date" id="match_date" name="match_date" class="form-control" value="{{ form_data.match_date if form_data else '' }}" required>
+      </div>
+      
+      <!-- 팀 교체 버튼 -->
+      <div class="text-center mb-3">
+        <button type="button" id="swapTeams" class="btn btn-warning">🔄 블루/레드 변환</button>
+      </div>
+
+      <div class="row">
+        <!-- 블루팀 -->
+        <div class="col-md-6">
+          <div class="p-3 mb-3" style="background-color: #ADD8E6; border-radius: 8px;">
+            <h2 class="text-primary">🔹 블루팀</h2>
+
+            <!-- TOP -->
+            <div class="mb-3 position-section">
+              <label class="form-label">TOP</label>
+              <select name="blue_top" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.blue_top == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="blue_top_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="blue_top_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_top_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_top_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- JUNGLE -->
+            <div class="mb-3 position-section">
+              <label class="form-label">JUNGLE</label>
+              <select name="blue_jungle" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.blue_jungle == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="blue_jungle_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="blue_jungle_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_jungle_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_jungle_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- MID -->
+            <div class="mb-3 position-section">
+              <label class="form-label">MID</label>
+              <select name="blue_mid" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.blue_mid == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="blue_mid_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="blue_mid_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_mid_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_mid_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- ADC -->
+            <div class="mb-3 position-section">
+              <label class="form-label">ADC</label>
+              <select name="blue_adc" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.blue_adc == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="blue_adc_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="blue_adc_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_adc_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_adc_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- SUPPORT -->
+            <div class="mb-3 position-section">
+              <label class="form-label">SUPPORT</label>
+              <select name="blue_support" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.blue_support == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="blue_support_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="blue_support_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_support_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="blue_support_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 레드팀 -->
+        <div class="col-md-6">
+          <div class="p-3 mb-3" style="background-color: #FFB6C1; border-radius: 8px;">
+            <h2 class="text-danger">🔺 레드팀</h2>
+
+            <!-- TOP -->
+            <div class="mb-3 position-section">
+              <label class="form-label">TOP</label>
+              <select name="red_top" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.red_top == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="red_top_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="red_top_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_top_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_top_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- JUNGLE -->
+            <div class="mb-3 position-section">
+              <label class="form-label">JUNGLE</label>
+              <select name="red_jungle" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.red_jungle == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="red_jungle_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="red_jungle_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_jungle_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_jungle_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- MID -->
+            <div class="mb-3 position-section">
+              <label class="form-label">MID</label>
+              <select name="red_mid" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.red_mid == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="red_mid_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="red_mid_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_mid_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_mid_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- ADC -->
+            <div class="mb-3 position-section">
+              <label class="form-label">ADC</label>
+              <select name="red_adc" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.red_adc == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="red_adc_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="red_adc_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_adc_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_adc_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+
+            <!-- SUPPORT -->
+            <div class="mb-3 position-section">
+              <label class="form-label">SUPPORT</label>
+              <select name="red_support" class="player-select form-select mb-1" required>
+                <option value="" disabled selected>플레이어 선택</option>
+                {% for p in players %}
+                <option value="{{ p }}" {% if form_data and form_data.red_support == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              <select name="red_support_champion" class="champion-select form-select mb-1" required>
+                <option value="" disabled selected>챔피언 선택</option>
+                {% for c in champions %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              </select>
+              <div class="kda-container">
+                <input type="number" name="red_support_kills" placeholder="킬" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_support_deaths" placeholder="데스" min="0" class="form-control kda-field" value="0">
+                <input type="number" name="red_support_assists" placeholder="어시" min="0" class="form-control kda-field" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 승리 팀 선택 -->
+      <div class="mb-3 text-center">
+        <h4>🏆 승리 팀</h4>
+        <select id="winner" name="winner" class="form-select w-50 mx-auto" required>
+          <option value="" selected disabled>선택하세요</option>
+          <option value="blue">블루팀</option>
+          <option value="red">레드팀</option>
+        </select>
+      </div>
+
+      <!-- 제출 및 기능 버튼 -->
+      <div class="text-center">
+        <button type="submit" class="btn btn-success px-4 py-2 me-2">경기 기록 저장</button>
+        <button type="button" id="resetAll" class="btn btn-secondary px-4 py-2">전체 초기화</button>
+        <a href="/" class="btn btn-primary px-4 py-2 ms-2">🏠 홈으로</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- jQuery 추가 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- 부트스트랩 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 JS 추가 -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  
+  <script>
+    $(document).ready(function() {
+      
+      // 데이터 속성을 통해 성공 메시지 유무 확인
+      var hasSuccessMessage = document.body.dataset.hasSuccessMessage === 'true';
+      
+      if (hasSuccessMessage) {
+      resetChampionsAndKDA();
+      }
+
+      // 폼 제출 시 데이터 저장
+      const formElement = document.getElementById('recordForm');
+      
+      // 날짜 값이 있으면 유지, 없으면 오늘 날짜로 설정
+      const today = new Date().toISOString().slice(0, 10);
+      if (!$('#match_date').val()) {
+        $('#match_date').val(today);
+      }
+      
+      // 전체 필드를 초기화하는 함수
+      function resetAllFields() {
+        // 날짜 필드 오늘 날짜로 초기화
+        const today = new Date().toISOString().slice(0, 10);
+        $('#match_date').val(today);
+        
+        // 플레이어 필드 초기화
+        $('.player-select').val(null).trigger('change');
+        
+        // 챔피언 필드 초기화
+        $('.champion-select').val(null).trigger('change');
+        
+        // KDA 필드 초기화
+        $('.kda-field').val(0);
+        
+        // 승리 팀 초기화
+        $('#winner').val('');
+      }
+      
+      // 챔피언과 KDA만 초기화하는 함수
+      function resetChampionsAndKDA() {
+        // 챔피언 필드 초기화
+        $('.champion-select').val(null).trigger('change');
+        
+        // KDA 필드 초기화
+        $('.kda-field').val(0);
+      }
+      
+      // Select2 초기화
+      $('.player-select, .champion-select').select2({
+        placeholder: "선택하세요",
+        allowClear: true,
+        language: {
+          noResults: function() { return "결과가 없습니다"; },
+          searching: function() { return "검색 중..."; }
+        }
+      });
+      
+      // 블루/레드 변환 버튼 기능
+      $('#swapTeams').on('click', function() {
+        swapTeams();
+      });
+      
+      // 전체 초기화 버튼
+      $('#resetAll').on('click', function() {
+        resetAllFields();
+      });
+      
+      // 블루팀과 레드팀 데이터 교환 함수
+      function swapTeams() {
+        const positions = ['top', 'jungle', 'mid', 'adc', 'support'];
+        
+        positions.forEach(function(position) {
+          // 플레이어 값 교환
+          const bluePlayer = $(`select[name="blue_${position}"]`).val();
+          const redPlayer = $(`select[name="red_${position}"]`).val();
+          
+          $(`select[name="blue_${position}"]`).val(redPlayer).trigger('change');
+          $(`select[name="red_${position}"]`).val(bluePlayer).trigger('change');
+          
+          // 챔피언 값 교환
+          const blueChampion = $(`select[name="blue_${position}_champion"]`).val();
+          const redChampion = $(`select[name="red_${position}_champion"]`).val();
+          
+          $(`select[name="blue_${position}_champion"]`).val(redChampion).trigger('change');
+          $(`select[name="red_${position}_champion"]`).val(blueChampion).trigger('change');
+          
+          // KDA 값 교환
+          const blueKills = $(`input[name="blue_${position}_kills"]`).val();
+          const blueDeaths = $(`input[name="blue_${position}_deaths"]`).val();
+          const blueAssists = $(`input[name="blue_${position}_assists"]`).val();
+          
+          const redKills = $(`input[name="red_${position}_kills"]`).val();
+          const redDeaths = $(`input[name="red_${position}_deaths"]`).val();
+          const redAssists = $(`input[name="red_${position}_assists"]`).val();
+          
+          $(`input[name="blue_${position}_kills"]`).val(redKills);
+          $(`input[name="blue_${position}_deaths"]`).val(redDeaths);
+          $(`input[name="blue_${position}_assists"]`).val(redAssists);
+          
+          $(`input[name="red_${position}_kills"]`).val(blueKills);
+          $(`input[name="red_${position}_deaths"]`).val(blueDeaths);
+          $(`input[name="red_${position}_assists"]`).val(blueAssists);
+        });
+        
+        // 승리 팀 값 교환
+        const winner = $('#winner').val();
+        if (winner === 'blue') {
+          $('#winner').val('red');
+        } else if (winner === 'red') {
+          $('#winner').val('blue');
+        }
+      }
+      
+      
+      
+      // 폼 요소에 포커스 이벤트
+      $(document).on('focus', '.select2-selection', function(e) {
+        const containerId = $(this).closest('.select2-container').attr('id');
+        const selectId = containerId.replace('select2-', '').replace('-container', '');
+        const $select = $(`#${selectId}`);
+        
+        if ($select.length) {
+          $select.select2('open');
+          setTimeout(function() {
+            $('.select2-search__field:visible').focus();
+          }, 50);
+        }
+      });
+      
+      // 엔터키 처리
+      $('.player-select, .champion-select').on('keydown', function(e) {
+        if (e.key === 'Enter' && !$('.select2-search__field:visible').length) {
+          e.preventDefault();
+          $(this).select2('open');
+        }
+      });
+      
+      // KDA 필드 탭 이동 처리
+      $('.kda-container input:last-child').on('keydown', function(e) {
+        if (e.key === 'Tab' && !e.shiftKey) {
+          const $currentSection = $(this).closest('.position-section');
+          const $nextSection = $currentSection.next('.position-section');
+          
+          if ($nextSection.length) {
+            e.preventDefault();
+            const $nextSelect = $nextSection.find('.player-select');
+            $nextSelect.focus();
+            $nextSelect.select2('open');
+          }
+        }
+      });
+      
+      // 승리 팀 선택 자동 드롭다운
+      $('#winner').on('focus', function() {
+        $(this).click();
+      });
+      
+      // 검색 필드 자동 포커스
+      $(document).on('select2:open', function() {
+        setTimeout(() => {
+          document.querySelector('.select2-container--open .select2-search__field').focus();
+        }, 10);
+      });
+      
+      // 첫 번째 요소에 포커스
+      setTimeout(function() {
+        if (!$('.player-select:first').val()) {
+          $('.player-select:first').focus();
+        }
+      }, 500);
+    });
+  </script>
 </body>
 </html>
